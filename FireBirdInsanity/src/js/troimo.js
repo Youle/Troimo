@@ -142,9 +142,18 @@ Troimo.Game = function(functions)
     console.warn('Tu devrais renseigner une fonction comme init ou manager new Troimo.Game({manager : maFonction}) par exemple')
     return;
   }
-  
-  this.toRender = {}
-  this.toRender.displayObject = [];
+  var c = document.getElementById('troimo');
+  console.log(c)
+  this.width = c.width;
+  this.height = c.height;
+  this.toRender = {
+    images : {},
+    displayObject : []
+  }
+  this._hidden = {
+    imagesToLoad : 0,
+    imageLoaded : 0
+  }
   this.x = 0;
   this.y = 0;
   this.second = {};
@@ -171,17 +180,33 @@ Troimo.Game = function(functions)
 
   this.config = {};
   
-  this.init();
+  this.preload();
 }
 
 Troimo.Game.prototype =
 {
+  preload : function()
+  {
+    var game = this
+    if(this.second.preload)
+      this.second.preload(this);
+    for(var i in this.toRender.images)
+    {
+      this.toRender.images[i].onload = function()
+      {
+        game._hidden.imageLoaded++
+        if(game._hidden.imageLoaded == game._hidden.imagesToLoad);
+          game.init()
+      }
+      this.add.parent = this;
+    }
+  },
   init : function()
   {
     /*
     * INITIALISATION DE LA CONFIG
     */
-    this.context = document.getElementById('canvas').getContext('2d');
+    this.context = document.getElementById('troimo').getContext('2d');
     for(key in Troimo.config.toGet)
     {
       var value = Troimo.config.toGet[key];
@@ -195,10 +220,10 @@ Troimo.Game.prototype =
   },
   background : {
     color : "#DFDFDF",
-    draw : function(ctx)
+    draw : function(game)
     {
-      ctx.fillStyle = this.color;
-      ctx.fillRect(0, 0, 600, 600);  
+      game.context.fillStyle = this.color;
+      game.context.fillRect(0, 0, game.width, game.height);  
     }
   },
   write : function(text, x, y, fontSize, color)
@@ -212,7 +237,7 @@ Troimo.Game.prototype =
   render : function()
   {
     var that = this;
-    this.background.draw(this.context);
+    this.background.draw(this);
     for(key in this.toRender)
     {
       if(Array.isArray(this.toRender[key]))
@@ -221,6 +246,13 @@ Troimo.Game.prototype =
         for(var i = 0; i < ar.length; i++)
         {
           ar[i].draw(this)
+        }
+      }
+      else if(typeof this.toRender[key] === "object")
+      {
+        for(i in this.toRender[key])
+        {
+          this.toRender[key][i].draw(this)
         }
       }
     }
@@ -257,9 +289,26 @@ Troimo.Game.prototype =
     {
 
     },
-    spritesheet : function(name, src, tileW, tileH)
+    spritesheet : function(name, tileW, tileH)
     {
+      var i = this.parent.toRender.images[name];
+      if(!i)
+      {
+        console.error('Name of the image you gave isn\'t exist')
+        return
+      }
+      i.nbFrame = {
+        w : i.width / tileW,
+        h : i.height / tileH
+      }
+      if(i.nbFrame.w % 1  !== 0 || i.nbFrame.h % 1 !== 0)
+        console.warn('The tilesize you gave isn\'t appropriate to the image width, it could cause animations problems');
 
+      i.type = "spritesheet";
+      i.tileW = tileW;
+      i.tileH = tileH;
+      i.frames = 0
+      this.parent.toRender.images[name] = i;
     },
     tilemap : function(name, src, tileW, tileH)
     {
@@ -268,6 +317,31 @@ Troimo.Game.prototype =
     animation : function(name, firstTile, nbTiles, fps, loop)
     {
       
+    }
+  },
+  load : {
+    image : function(game, name, src)
+    {
+      var i = new Image()
+      i.src = src
+      i.name = name
+      game.toRender.images[name] = i;
+      game._hidden.imagesToLoad++;
+    }
+  },
+  get : {
+    imageData : function(i)
+    {
+      console.log(i.tileW)
+      return {
+        x : i.x || 0,
+        y : i.y || 0,
+        width : i.tileW || i.width,
+        height : i.tileH || i.height,
+        nbFrame : i.nbFrame || {w : 1, h : 1},
+        ratio : i.ratio || 1,
+        frame : i.frame || [0, 0]
+      }
     }
   }
 }
@@ -287,3 +361,20 @@ Troimo.Manager.prototype =
   }
 }
 Troimo.Manager.prototype.constructor = Troimo.Manager;
+
+Image.prototype = 
+{
+  draw : function(game)
+  {
+    var d = game.get.imageData(this);
+    
+    this.frames++
+    game.context.drawImage(this, d.frame[0] * d.width, d.frame[1] * d.height, d.width, d.height, d.x, d.y, d.width * d.ratio, d.height * d.ratio)
+    if(this.animations.length > 0)
+      this.animate(game)
+  },
+  animate : function(game)
+  {
+    
+  }
+}
