@@ -12,12 +12,18 @@ function Init(game)
 {
   game.text = game.write('Hi', 200, 10, 15, "#FFFFFF");
   game.shaker.play();
-  game.add.spritesheet('fireguy', 240, 240)
+  game.po = game.add.spritesheet('fireguy', 240, 240)
+  game.po.add.animation('idle')
 }
-
+/*function Po(game)
+{
+	this.x = 0;
+	this.y = 0;
+	this.image = game.add.spritesheet('fireguy', 240, 240);
+}*/
 function Render(game)
 {
- 
+	game.po.draw(game);
 }
 
 function Manager(game)

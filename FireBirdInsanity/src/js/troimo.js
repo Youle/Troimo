@@ -248,16 +248,17 @@ Troimo.Game.prototype =
           ar[i].draw(this)
         }
       }
-      else if(typeof this.toRender[key] === "object")
+      /*else if(typeof this.toRender[key] === "object")
       {
         for(i in this.toRender[key])
         {
           this.toRender[key][i].draw(this)
         }
-      }
+      }*/
     }
     if(!!this.shaker.shaga)
       this.shaker.main(this);
+    //debugger
     if(this.second.render)
       this.second.render(this);
     requestAnimFrame(function(){that.render()});
@@ -291,15 +292,16 @@ Troimo.Game.prototype =
     },
     spritesheet : function(name, tileW, tileH)
     {
-      var i = this.parent.toRender.images[name];
+      var im = this.parent.toRender.images[name];
+      var i = {}
       if(!i)
       {
         console.error('Name of the image you gave isn\'t exist')
         return
       }
       i.nbFrame = {
-        w : i.width / tileW,
-        h : i.height / tileH
+        w : im.width / tileW,
+        h : im.height / tileH
       }
       if(i.nbFrame.w % 1  !== 0 || i.nbFrame.h % 1 !== 0)
         console.warn('The tilesize you gave isn\'t appropriate to the image width, it could cause animations problems');
@@ -307,8 +309,12 @@ Troimo.Game.prototype =
       i.type = "spritesheet";
       i.tileW = tileW;
       i.tileH = tileH;
-      i.frames = 0
-      this.parent.toRender.images[name] = i;
+      i.frames = 0;
+      i.x = 200;
+      i.y = 100
+      i.image = im;
+      //this.parent.toRender.images[name] = i;
+      return new Troimo.Image(this.parent, i)
     },
     tilemap : function(name, src, tileW, tileH)
     {
@@ -325,19 +331,21 @@ Troimo.Game.prototype =
       var i = new Image()
       i.src = src
       i.name = name
+      i.x = 200;
+      i.y = 200;
       game.toRender.images[name] = i;
       game._hidden.imagesToLoad++;
     }
   },
   get : {
-    imageData : function(i)
+    imageData : function(game, i)
     {
-      console.log(i.tileW)
+      var d = i.disableShake ? 1 : i.howFar ? game.x * i.howFar : game.x;
       return {
-        x : i.x || 0,
-        y : i.y || 0,
-        width : i.tileW || i.width,
-        height : i.tileH || i.height,
+        x : d + i.x,
+        y : d + i.y,
+        width : i.tileW || i.image.width,
+        height : i.tileH || i.image.height,
         nbFrame : i.nbFrame || {w : 1, h : 1},
         ratio : i.ratio || 1,
         frame : i.frame || [0, 0]
@@ -345,9 +353,67 @@ Troimo.Game.prototype =
     }
   }
 }
-
 Troimo.Game.prototype.constructor = Troimo.Game;
 
+
+Troimo.Image = function(game, i)
+{
+  for(var key in i)
+  {
+    this[key] = i[key];
+  }
+  this.frame = [0, 0]
+  this.key = key;
+  this.parent = game;
+  this.add.parent = this;
+}
+Troimo.Image.prototype = 
+{
+  draw : function(game)
+  {
+    //game.toRender.images[this.key].image.draw(game);
+    var d = game.get.imageData(game, this);
+    if(this.frames == 0)
+      console.log(d)
+    this.frames++
+    game.context.drawImage(this.image, d.frame[0] * d.width, d.frame[1] * d.height, d.width, d.height, d.x, d.y, d.width * d.ratio, d.height * d.ratio)
+    if(this.animations)
+      this.animate(game)
+  },
+  animate : function()
+  {
+    if(!this.currentAnimation || this.currentAnimation == "")
+      return
+    var a = this.animations[this.currentAnimation];
+    if(this.frames % 30 == 0) 
+      a.frame++
+    if(a.frame >= this.nbFrame.h * this.nbFrame.w || this.nbFrame.h * this.nbFrame.w >= a.firstFrame + a.nbFrame)
+    {
+      a.frame = a.firstFrame || 0;
+    }
+    this.frame[0] = a.frame - this.frame[1] * this.nbFrame.w;
+    this.frame[1] = Math.floor(a.frame / this.nbFrame.w);
+  },
+  add : {
+    animation : function(key, firstFrame, nbFrame)
+    {
+      if(!this.parent.animations)
+        this.parent.animations = {}
+
+      this.parent.animations[key] = new Troimo.Animation(this.parent, key, firstFrame, nbFrame);
+      this.parent.currentAnimation = key
+    }
+  }
+}
+Troimo.Image.prototype.constructor = Troimo.Image;
+
+Troimo.Animation = function(game, key, fF, nF)
+{
+  this.key = key;
+  this.firstFrame = fF;
+  this.nbFrame = nF;
+  this.frame = fF || 0;
+}
 Troimo.Manager = function(second)
 {
 
@@ -361,20 +427,3 @@ Troimo.Manager.prototype =
   }
 }
 Troimo.Manager.prototype.constructor = Troimo.Manager;
-
-Image.prototype = 
-{
-  draw : function(game)
-  {
-    var d = game.get.imageData(this);
-    
-    this.frames++
-    game.context.drawImage(this, d.frame[0] * d.width, d.frame[1] * d.height, d.width, d.height, d.x, d.y, d.width * d.ratio, d.height * d.ratio)
-    if(this.animations.length > 0)
-      this.animate(game)
-  },
-  animate : function(game)
-  {
-    
-  }
-}
