@@ -1,0 +1,5 @@
+{
+	"pills" : {"url" : "src/json/pills.json"},
+	"snails" : {"url" : "src/json/snail.json"},
+	"type" : {"url" : "src/json/type.json"}
+}

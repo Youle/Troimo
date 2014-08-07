@@ -1,0 +1,18 @@
+{
+  "tiles":
+  [
+    {"flipX":false,"rot":0,"tile":-1,"y":0,"index":0,"x":0},
+    {"flipX":false,"rot":0,"tile":-1,"y":0,"index":1,"x":1},
+    {"flipX":false,"rot":0,"tile":-1,"y":0,"index":2,"x":2},
+    {"flipX":false,"rot":0,"tile":-1,"y":0,"index":3,"x":3},
+    {"flipX":false,"rot":0,"tile":-1,"y":0,"index":4,"x":4},
+    {"flipX":false,"rot":0,"tile":-1,"y":0,"index":5,"x":5}
+  ],
+  "tilewidth":32,
+  "tileswide":6,
+  "tileheight":64,
+  "tileshigh":1,
+  "src" : "src/img/pills.png",
+  "ratio" : 1,
+  "frame" : 0
+}
