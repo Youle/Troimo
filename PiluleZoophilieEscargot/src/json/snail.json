@@ -1,0 +1,17 @@
+{
+  "tileheight":60,
+  "tileshigh":1,
+  "tiles":[
+      {"y":0,"flipX":false,"rot":0,"tile":-1,"index":0,"x":0},
+      {"y":0,"flipX":false,"rot":0,"tile":-1,"index":1,"x":1},
+      {"y":0,"flipX":false,"rot":0,"tile":-1,"index":2,"x":2},
+      {"y":0,"flipX":false,"rot":0,"tile":-1,"index":3,"x":3}
+  ],
+  "tilewidth":128,
+  "tileswide":4,
+  "animated" : true,
+  "fps" : 15,
+  "src" : "src/img/snail.png",
+  "frame" : 0,
+  "ratio" : 1
+}
