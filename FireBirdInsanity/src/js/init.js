@@ -14,7 +14,6 @@ function Preload(game)
 }
 function Init(game)
 {
-  //game.text = game.write('Hi', 200, 10, 15, "#FFFFFF");
   game.shaker.play();
   game.map = {
   	length : 50
@@ -76,8 +75,14 @@ function Render(game)
 		var d = game.dudes[i];
 		d.draw(game);
 		d.fire.draw(game)
+		d.collideBox = !!d.side ? [d.x + 40, d.y + 60, 140, 200] : [d.x + 40, d.y, 140, 180];
+		//game.context.fillStyle = d.colliding ? 'red' : 'green';
+		//game.context.fillRect(d.collideBox[0],d.collideBox[1],d.collideBox[2],d.collideBox[3])
 		d.manage(game);
 	}
+	game.bird.collideBox = [game.bird.x + 50, game.bird.y + 90, 100, 50]
+    //game.context.fillStyle = game.bird.colliding ? 'red' : 'green';
+    //game.context.fillRect(game.bird.collideBox[0],game.bird.collideBox[1],game.bird.collideBox[2],game.bird.collideBox[3])
 }
 
 function addDude(game)
@@ -87,7 +92,7 @@ function addDude(game)
 	var ff = !!side ? 6 : 0; 
 	var d = game.add.spritesheet('fireguy', 240, 240, {x : 800, y : y});
 	d.fire = game.add.spritesheet('fire', 120, 120, {x : d.x + 60, y : d.y - 30});
-
+	d.side = side;
 	var f = Math.random() > 0.5 ? 0 : 6;
 
 	game.add.animation(d, 'idle', ff, ff + 6);

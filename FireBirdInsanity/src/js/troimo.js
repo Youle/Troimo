@@ -244,14 +244,14 @@ Troimo.Game.prototype =
     this.background.draw(this);
     for(key in this.toRender)
     {
-      if(Array.isArray(this.toRender[key]))
+      /*if(Array.isArray(this.toRender[key]))
       {
         var ar = this.toRender[key]
         for(var i = 0; i < ar.length; i++)
         {
           ar[i].draw(this)
         }
-      }
+      }*/
       /*else if(typeof this.toRender[key] === "object")
       {
         for(i in this.toRender[key])
@@ -267,13 +267,17 @@ Troimo.Game.prototype =
     requestAnimFrame(function(){that.render()});
   },
   animations : {
-    play : function(parent, key)
+    play : function(parent, key, loop)
     {
       if(!parent.animations[key])
       {
         console.error(parent.key + ' hasn\'t animation named ' + key);
         return;
       }
+
+      parent.loop = loop === false ? false : true;
+      if(key == 'death')
+        console.log(parent.loop)
       parent.animations[key].frame = parent.animations[key].firstFrame || 0;
       parent.frame[1] = Math.floor(parent.animations[key].frame / parent.nbFrame.w);
       parent.frame[0] = parent.animations[key].frame - parent.frame[1] * parent.nbFrame.w;
@@ -371,7 +375,6 @@ Troimo.Game.prototype =
     {
       if(!parent.animations)
         parent.animations = {}
-
       parent.animations[key] = new Troimo.Animation(this.parent, key, firstFrame, nbFrame, fps);
     }
   },
@@ -473,7 +476,12 @@ Troimo.Image.prototype =
       a.frame++
     if(a.frame >= this.nbFrame.h * this.nbFrame.w || a.frame >= a.nbFrame)
     {
-      a.frame = a.firstFrame || 0;
+      if(this.key == 'bird' && this.currentAnimation == "death")
+        console.log(this.loop)
+      if(!!this.loop)
+        a.frame = a.firstFrame || 0;
+      else
+        this.animationEnded = true;
     }
     this.frame[1] = Math.floor(a.frame / this.nbFrame.w);
     this.frame[0] = a.frame - this.frame[1] * this.nbFrame.w;

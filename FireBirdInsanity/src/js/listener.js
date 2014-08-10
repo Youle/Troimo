@@ -3,7 +3,7 @@ function keyDown(e, game)
 	var k = e.keyCode;
 	var acceptedKey = [38, 40, 32];
 	var mood = k- 39
-	if(acceptedKey.indexOf(k) != -1)
+	if(acceptedKey.indexOf(k) != -1 && !game.bird.isDead)
 	{
 		if(k == 32)
 		{
@@ -23,7 +23,7 @@ function keyUp(e, game)
 {
 	var k = e.keyCode;
 	var acceptedKey = [38, 40, 32];
-	if(acceptedKey.indexOf(k) != -1)
+	if(acceptedKey.indexOf(k) != -1 && !game.bird.isDead)
 	{
 		if(k == 32)
 		{
